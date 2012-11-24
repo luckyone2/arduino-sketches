@@ -48,6 +48,10 @@ THE SOFTWARE.
 // ALT high = 0x1D (OSEPP board!)
 ADXL345 accel(0x1D);
 
+// create the interface to the OSEPP Shield using the default
+// address (dip switches 0,0,0)
+OSEPPShield shield;
+
 int16_t ax, ay, az;
 
 #define LED_PIN 13 // (Arduino is 13, Teensy is 6)
@@ -61,9 +65,11 @@ void setup() {
     // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
     // it's really up to you depending on your project)
     Serial.begin(9600);
-    
-    shield_select_port(SHIELD_ADDR_OFF_OFF_OFF, 0);
 
+    // Tell the OSEPP Shield that we want to communicate with devices plugged into
+    // port 0
+    shield.select_port(0);
+    
     // initialize device
     Serial.println("Initializing I2C devices...");
     accel.initialize();

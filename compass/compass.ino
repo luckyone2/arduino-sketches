@@ -1,3 +1,6 @@
+// updated to use OSEPP Shield
+// 2011-11-22 - William Day <code@william-day.com>
+
 // I2C device class (I2Cdev) demonstration Arduino sketch for HMC5883L class
 // 10/7/2011 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/i2cdevlib
@@ -44,6 +47,9 @@ THE SOFTWARE.
 // this device only supports one I2C address (0x1E)
 HMC5883L mag;
 
+// use default address (dip switches = 0,0,0)
+OSEPPShield shield;
+
 int16_t mx, my, mz;
 
 #define LED_PIN 13
@@ -58,7 +64,8 @@ void setup() {
     // it's really up to you depending on your project)
     Serial.begin(9600);
 
-    shield_select_port(SHIELD_ADDR_OFF_OFF_OFF, 3);
+    // communicate with devices plugged in to port 3
+    shield.select_port(3);
 
     // initialize device
     Serial.println("Initializing I2C devices...");
