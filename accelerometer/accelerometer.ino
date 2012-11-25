@@ -50,9 +50,13 @@ ADXL345 accel(0x1D);
 
 // create the interface to the OSEPP Shield using the default
 // address (dip switches 0,0,0)
-OSEPPShield shield;
+OSEPPShield shield(0,0,0);
 
 int16_t ax, ay, az;
+
+float    max_g;
+uint8_t  range; // 0 = 2, 1 = 4, 2 = 8, 3 = 16
+uint16_t max_range;
 
 #define LED_PIN 13 // (Arduino is 13, Teensy is 6)
 bool blinkState = false;
@@ -80,21 +84,34 @@ void setup() {
 
     // configure LED for output
     pinMode(LED_PIN, OUTPUT);
+    
+    // set to +- 2G range
+    set_range(0x0);
 }
 
+// see http://www.analog.com/static/imported-files/data_sheets/ADXL345.pdf
+// for notes on the following functions
+void set_range(uint8_t range) {
+  max_g     = (float)(2 << range); // max gravity: 2,  4,  8,  16
+  max_range = ((1 << 10) << range) >> 1;  // bit depths:  10, 11, 12, 13; >> 1 since centered around 0
+  accel.setRange(range);
+  Serial.println("Setting range!");
+  Serial.print("max_g: "); Serial.println(max_g);
+  Serial.print("max_range: "); Serial.println(max_range);
+}
+
+float scale(int16_t accel) {
+  return ((float)accel) / max_range * max_g;
+} 
+
 void loop() {
-    // read raw accel measurements from device
-    accel.getAcceleration(&ax, &ay, &az);
-
-    // display tab-separated accel x/y/z values
-    Serial.print("accel:\t");
-    Serial.print(ax); Serial.print("\t");
-    Serial.print(ay); Serial.print("\t");
-    Serial.println(az);
-
-    if( abs(ax) > 180) {
-      digitalWrite(LED_PIN, 1);
-      delay(2000);
-      digitalWrite(LED_PIN, 0);
-    }
+  // read raw accel measurements from device
+  accel.getAcceleration(&ax, &ay, &az);
+  
+  // display tab-separated accel x/y/z values
+  Serial.print(scale(ax)); Serial.print("\t");
+  Serial.print(scale(ay)); Serial.print("\t");
+  Serial.println(scale(az));
+  
+  delay(100);
 }
