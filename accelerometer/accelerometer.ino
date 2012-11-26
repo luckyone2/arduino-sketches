@@ -92,12 +92,22 @@ void setup() {
 // see http://www.analog.com/static/imported-files/data_sheets/ADXL345.pdf
 // for notes on the following functions
 void set_range(uint8_t range) {
-  max_g     = (float)(2 << range); // max gravity: 2,  4,  8,  16
-  max_range = ((1 << 10) << range) >> 1;  // bit depths:  10, 11, 12, 13; >> 1 since centered around 0
-  accel.setRange(range);
-  Serial.println("Setting range!");
-  Serial.print("max_g: "); Serial.println(max_g);
-  Serial.print("max_range: "); Serial.println(max_range);
+  if (accel.getFullResolution()) {
+    max_g     = (float)(2 << range); // max gravity: 2,  4,  8,  16
+    max_range = ((1 << 10) << range) >> 1;  // bit depths:  10, 11, 12, 13; >> 1 since centered around 0
+    accel.setRange(range);
+    Serial.println("Setting range scale in full resolution mode");
+    Serial.print("max_g: "); Serial.println(max_g);
+    Serial.print("max_range: "); Serial.println(max_range);
+  } else {
+    max_g     = (float)(2 << range); // max gravity: 2,  4,  8,  16
+    max_range = (1 << 10) >> 1;  // bit depths:  10, 11, 12, 13; >> 1 since centered around 0
+    accel.setRange(range);
+    Serial.println("Setting range scale in 10 bit resolution resolution mode");
+    Serial.print("max_g: "); Serial.println(max_g);
+    Serial.print("max_range: "); Serial.println(max_range);
+    Serial.println("Setting range scale in 10 bit resolution mode");
+  }
 }
 
 float scale(int16_t accel) {
